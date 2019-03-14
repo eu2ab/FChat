@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import re
 
-# all the urls of thread pages in FChat
+# All the urls of thread pages in FChat
 wwws = []
 first = "http://www.ferrarichat.com/forum/ferraris/"
 wwws.append(first)
@@ -15,22 +15,25 @@ for i in range(2, 21):
 def url_extract(www):
     """
     Extract thread URLs from main forum URLs
-    :param www: main site link
-    :return: all urls from classifieds forum
+    :param www: Main site link
+    :return: All urls from classifieds forum
     """
-    # import page and scrape for links
+
+    # Import page and scrape for links
     page = requests.get(www)
     soup = BeautifulSoup(page.content, "lxml")
     # print(soup.prettify())
+
     links = []
     for link in soup.find_all('a'):
         links.append(link.get('href'))
-    # subset of links with thread links
+
+    # Subset of links with thread links
     links = [x for x in links if x]  # removing empty elements
     sub = "http://www.ferrarichat.com/forum/ferraris/5"
     links = [s for s in links if sub in s]  # finding only the links for thread posts
 
-    # find list of unique post ids
+    # Find list of unique post ids
     ids = []
     for i in range(0, len(links)):
         a = links[i]
@@ -38,14 +41,14 @@ def url_extract(www):
         ids.append(a)
     ids = list(set(ids))
 
-    # match with original list to keep a set of unique urls
+    # Match with original list to keep a set of unique urls
     urls = []
     for i in range(0, len(ids)):
         a = [s for s in links if ids[i] in s]
         a = a[0]
         urls.append(a)
 
-    return urls
+    return(urls)
 
 df = []
 for i in range(0, 19):  # 20 total pages in classified section
@@ -53,14 +56,15 @@ for i in range(0, 19):  # 20 total pages in classified section
     x = url_extract(www)
     df.append(x)
 
-df = [item for sublist in df for item in sublist]  # flattening all lists within the list
-df = [s for s in df if 'wanted' or 'wtb' not in s]  # removing wanted ads
-df = [s for s in df if 'wtb' not in s]  # removing wtb ads
+df = [item for sublist in df for item in sublist]  # Flattening all lists within the list
+df = [s for s in df if 'wanted' or 'wtb' not in s]  # Removing wanted ads
+df = [s for s in df if 'wtb' not in s]  # Removing wtb ads
 
 
 def first_extract(df):
     """
     Extract the first post from each thread URL
+
     :param df: list of URLs
     :return: list of first posts for each df
     """
@@ -75,13 +79,12 @@ def first_extract(df):
         posts = posts[0]  # picks only first post
         posts = posts.replace('<br/>', '')
         firsts.append(posts)
-    return firsts
+
+    return(firsts)
+
 firsts = first_extract(df)
 
 data = pd.DataFrame({'Url': df, 'First Post': firsts}, columns=['Url', 'First Post'])
-###########################################################################################
-# Combining url and first post, then extracting data from it
-
 
 
 
